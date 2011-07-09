@@ -6,363 +6,671 @@
 
  <script type='text/javascript'>
 
-Array.prototype.clone = function() {
 
-var newObj = this.slice(0);
-for (i=0; i<this.length; i++) {
+//Array clone prototype function
 
-if (this[i].clone) {
+	Array.prototype.clone = function() {
 
-newObj[i] = this[i].clone();
-break;
-}
-}
+		var newObj = this.slice(0);
+	
+		for (i=0; i<this.length; i++) {
 
-return newObj;
+			if (this[i].clone) {
 
-}
+				newObj[i] = this[i].clone();
+				break;
+			}
+		}
 
-var dump=0;
+		return newObj;
 
-var currentSource = 0;
+	}
 
-var myHeight = 0;
-var myWidth = 0;
 
-var sources = new Array();
+//Set up global variables
 
-var grid = new Array();
-var newGrid = new Array();
 
-var germs = new Array();
+//Boolean switch, trigger to dump properties for trouble-shooting
+	var dump=0;
 
+//This sets which substance to display on the grid. Set to zero for none.
+	var currentSource = 0;
 
-function synapse(weight, destination) {
 
-this.weight = weight;
-this.destination = destination;
+//Height and width values for browser window.
+	var myHeight = 0;
+	var myWidth = 0;
 
-}
+//An array that contains the settings for different substances.  Will contains substance objects.
+	var sources = new Array();
 
-function neuron(synapseData, activationThreshold) {
-var this.synapses = new Array();
-this.activationThreshold = activationThreshold;
+//A three-dimensional array that contains the levels for each substance at each point on the grid.
+	var grid = new Array();
 
-for (i=0; i<synapseData; i++) {
+//As the substance diffussion pattern is calculated the results are placed in this array. At the end
+//of the iteration, this is cloned back to grid[]
+	var newGrid = new Array();
 
-this.synapses[i] = new synapse(synapseData[0], synapseData[1]);
 
+//An array of bacterium objects. 
+	var germs = new Array();
 
-}
 
-}
 
-function neuralNetwork(neurons) {
 
-var this.network = new Array();
 
-for (x=0; x<neurons.length; x++) {
 
-this.network[x] = new Array()
+//step through a neuralNetwork object and return html with data on neural configuration
+	function viewNetwork(netObj) {
+		
+//setup the final variable to be returned
+		htmlOut = '';
 
-for (y=0; y<neurons[x].length; y++) {
-this.network[x][y] = new neuron(neurons[x][y][0], neurons[x][y][1]);
+//Step through the whole network array in neuralNetwork object
+		for (x=0; x<netObj.network.length; x++) {
+			
+//output the layer number at the start of each x value
+			htmlOut = htmlOut + 'layer ' + x + ' - ';
 
+//step through each neuron on the current layer
+			for (y=0; y<netObj.network[x].length; y++) {
 
-}
-}
+//output the neuron number and activationThreshold for each neuron
+				htmlOut = htmlOut + y + ' - ' + netObj.network[x][y].activationThreshold + '(';
 
-}
 
-function bacterium(x, y, i) {
+//step through the synapses array in the current neuron object
+				for (i=0; i<netObj.network[x][y].synapses.length; i++) {
 
-addImg('germ' + i, 'germ.gif', x, y);
 
-counter = 0;
-this.atp = 20;
-this.cellWall = 100;
-this.protein = 20;
-this.x = x;
-this.y = y;
-this.iterate = function() {
-counter++;
-avgGlucose = sumArray(surroundingSample(this.x, this.y, 1)) / 8;
-avgProtein = sumArray(surroundingSample(this.x, this.y, 2)) / 8;
-avgCilian = sumArray(surroundingSample(this.x, this.y, 3)) / 8;
-avgCaffeine = sumArray(surroundingSample(this.x, this.y, 4)) / 8;
+//output the destination and weight for each synapse. the synapse values will be deliniated by commas
+//and the whole group for the neuron will be bracketed by parathesis
+					htmlOut = htmlOut + netObj.network[x][y].synapses[i].destination + ' - ' + netObj.network[x][y].synapses[i].weight + ', ';
 
-if (this.atp < 200) {
-if (avgGlucose <= 1) {
-this.atp = this.atp + (avgGlucose * 5);
-}
+				}			
 
-if (avgGlucose > 1 && avgGlucose < 2) {
-this.atp = this.atp + (avgGlucose * 7);
-}
+				htmlOut = htmlOut + ')';
 
-if (avgGlucose >= 2) {
-this.atp = this.atp + (2 * 7);
-}
+			}
+		
+//do a few line breaks between layers
+			htmlOut = htmlOut + '<br><br>';
 
-}
+		}
 
+		return htmlOut;
 
-if (this.protein < 200) {
-if (avgProtein <= 1) {
-this.protein = this.protein + (avgProtein * 5);
-}
+	}
 
-if (avgProtein > 1 && avgProtein < 2) {
-this.protein = this.protein + (avgProtein * 7);
-}
 
-if (avgProtein >= 2) {
-this.protein = this.protein + (2 * 7);
-}
-}
+//Builds a pattern for an ANN that the neuralNetwork object can take as a parameter
+//the pattern is a generic layout for a neural configuration without specific neural activationThresholds or synaptic weights
+//metaPattern is a one dimension array.  
+	function buildNeuralPattern(metaPattern, synapticDensityFactor) {
 
-if (avgCilian <= 1) {
-this.cellWall = this.cellWall - (avgCilian * 5);
-}
 
-if (avgCilian > 1 && avgCilian < 2) {
-this.cellWall = this.cellWall - (avgCilian * 7);
-}
+//a three-dimensional array that can be passed to the neuralNetwork constructor.  
+		var outputArray = new Array();
 
-if (avgCilian >= 2) {
-this.cellWall = this.cellWall - (avgCilian * 15);
-}
+//sets up the number of synapses for each neuron.  If there are fewer neurons in the downstream layer than 
+//synaptic connections, set to the number of neurons in that layer. 
+		var workingDensityFactor = 0;
 
 
+		for (x=0; x<metaPattern.length; x++) {
 
+			outputArray[x] = new Array();
 
-if (this.cellWall < 100 && this.cellWall > 90) {
+			if (x < metaPattern.length - 1) {
 
-this.atp = this.atp - ((100 - this.cellWall) / 5);
-this.protein = this.protein - ((100 - this.cellWall) / 5);
-this.cellWall = this.cellWall + ((100 - this.cellWall) / 5)
+				if (synapticDensityFactor > metaPattern[x+1]) {
 
-}
+					workingDensityFactor = metaPattern[x+1];
 
-if (this.cellWall <= 90 && this.cellWall > 70) {
+				} else {
 
-this.atp = this.atp - ((100 - this.cellWall) / 3);
-this.protein = this.protein - ((100 - this.cellWall) / 3);
-this.cellWall = this.cellWall + ((100 - this.cellWall) / 4)
+					workingDensityFactor = synapticDensityFactor;
 
-}
+				}
+			}
 
-if (this.cellWall <= 70) {
+			for (y=0; y<metaPattern[x]; y++) {
 
-this.atp = this.atp - ((100 - this.cellWall) / 2);
-this.protein = this.protein - ((100 - this.cellWall) / 2);
-this.cellWall = this.cellWall + ((100 - this.cellWall) / 3)
+				if (x < metaPattern.length - 1) {
 
-}
+					outputArray[x][y] = new Array();
 
-document.getElementById('inspector').innerHTML = 'atp ' + this.atp + '<br>Protein ' + this.protein + '<br>Cellwall ' + this.cellWall + '<br>avgGlucose ' + avgGlucose + '<br>avgProtein ' + avgProtein + '<br>avgCilian ' + avgCilian + '<br>counter ' + counter;
+					if (y < (workingDensityFactor / 2)) {
 
+						ii = 0;
 
-}
+					} else if (y > (metaPattern[x+1] - Math.floor(.5 * workingDensityFactor))) {
 
-}
+						ii = metaPattern[x+1] - workingDensityFactor;
 
+					} else {
 
-function source(type, intensity, x, y, decay) {
+						ii = Math.floor(y - workingDensityFactor / 2);
 
+					}
 
-this.decay = decay / 100;
-this.type = type;
-this.intensity = intensity;
-this.x = x;
-this.y = y;
+					
+					for (i=0; i<workingDensityFactor; i++) {
 
+						outputArray[x][y][i] = ii;
+						ii++;
 
-}
+					}
 
+				} else {
+			
+				outputArray[x][y] = 0;
 
-function addImg(id, src, x, y) {
+				}
+			}
+		}
+	
+	return outputArray;
 
+	}
 
-getSize();
 
+//synapse object. Will be instanciated by nueron object.************************* 
+	function synapse(destination, weight) {
 
-var newLocation = document.createElement('img');
-newLocation.setAttribute('id', id);
-newLocation.setAttribute('src', src);
-document.getElementById('display').appendChild(newLocation);
-var currentLocation = document.getElementById(id);
-currentLocation.style.top = Math.round((myHeight / 35) * x);
-currentLocation.style.left = Math.round((myWidth / 50) * y);
-currentLocation.style.position = 'absolute';
-currentLocation.height = Math.round(myHeight / 34);
-currentLocation.width = Math.round(myWidth / 49);
+//Properties of synapse object. 
 
+//wieght is a multiplier that will be applied to activation voltage from the upstream neuron.
+		this.weight = weight;
+//destination of downstream neuron this synapse connects to.
+		this.destination = destination;
 
+	}
 
-}
 
 
-function setupGrid() {
 
+//neuron object. Will be instanciated by neuralNetwork object********************
+	function neuron(synapseData, activationThreshold) {
+		
+//Properties of neuron object
 
-germs[0] = new bacterium(10, 10, 0);
 
 
+		this.currentState = 0;
+//synapses is an array of synapse objects
+		this.synapses = new Array();
+//activationThreshold is the value at which the neuron fires when the sum of upstream synapses reaches it
+		this.activationThreshold = activationThreshold;
 
-for (i=0; i<6; i++) {
+//This loop cycles through an array of synapse data and uses it to populate the synapses array with synapse objects
+		for (i=0; i<synapseData.length; i++) {
 
-if (i > 0) {
-sources[i] = new source(i, /*Math.floor(Math.random()*100)*/ 90, Math.floor(Math.random()*30), Math.floor(Math.random()*30), 10);
-}
-var buttonHTML = '<input type=\"radio\" name=\"sourceButtons\" id=\"sourceButton' + i + '\" onClick=\"currentSource=' + i + '\"> ' + i + '<br>';
-document.getElementById('controlPanel').innerHTML = document.getElementById('controlPanel').innerHTML + buttonHTML;
+			this.synapses[i] = new synapse(synapseData[i][0], synapseData[i][1]);
 
-}
+		}
 
-for (x=0; x<30; x++) {
-grid[x] = new Array();
-newGrid[x] = new Array();
-for (y=0; y<30; y++) {
+	}
 
-addImg('location' + x + '-' + y, 'dot.gif', x, y);
-grid[x][y] = new Array(0,0,0,0,0,0);
-newGrid[x][y] = new Array(0,0,0,0,0,0);
-}
-}
-}
 
 
-function cycleTime() {
 
-difussion();
+//neuralNetwork object. ****************************************************
+	function neuralNetwork(neurons, pattern) {
 
-germs[0].iterate();
 
+		this.evaluate = function(inputArray) {
 
+			var outputArray = new Array();
 
-//document.getElementById('inspector').innerHTML = grid[10][10][1] + '<br>' + grid[10][10][2];
+			for (i=0; i<inputArray.length; i++) {
 
-for (i=1; i<sources.length; i++) {
-newGrid[sources[i].x][sources[i].y][i] = sources[i].intensity;
+				network[0][i].currentState = inputArray[i];
 
-}
+			}
 
+			for (x=0; x<network.length-1; x++) {
+		
+				for (y=0; y<network[x].length; y++) {
+		
+					for (i=0; i<network[x][y].synapses.length; i++) {
 
-grid = newGrid.clone();
+						if (x == 0 || network[x][y].currentState >= network[x][y].activationThreshold) {
 
+							network[x+1][network[x][y].synapses[i].destination].currentState = network[x+1][network[x][y].synapses[i].destination].currentState + (network[x][y].currentState * (network[x][y].synapses[i].weight / 100));
 
-}
-function difussion() {
+						}
+					}
 
+				}
+	
+			}
 
-for (x=0; x<grid.length; x++) {
+			for (x=0; x<network[network.length-1].length; x++) {
 
-for (y=0; y<grid[x].length; y++)  {
+				outputArray = network[network.length-1][x].currentState;
 
-for (i=1; i<sources.length; i++) {
+			}
 
-if (dump) {
-alert(grid[x][y][i]);
-dump = 0;
-}
+			return outputArray;
 
-ii = i;
+		}
 
-currentDecay = sources[i].decay;
+//network is an array of neuron objects
+		this.network = new Array();
 
-newGrid[x][y][i] = sumArray(surroundingSample(x, y, i)) / (8 + currentDecay);
+//These nested loops cycle through the network data and uses it to populate an array with neuron objects.
 
+		if (neurons != null && pattern == null) {
+			for (x=0; x<neurons.length; x++) {
 
-if (currentSource > 0) {
-document.getElementById('location' + x + '-' + y).style.opacity = newGrid[x][y][currentSource] / 100;
-document.getElementById('location' + x + '-' + y).style.filter = 'alpha(opacity=' + newGrid[x][y][currentSource] + ')';
-} else {
-document.getElementById('location' + x + '-' + y).style.opacity = 0;
-document.getElementById('location' + x + '-' + y).style.filter = 'alpha(opacity=0)';
-}
-i = ii;
+				this.network[x] = new Array();
 
-}
+				for (y=0; y<neurons[x].length; y++) {
+			
+					this.network[x][y] = new neuron(neurons[x][y][0], neurons[x][y][1]);
+				}
 
+			}
+		}
 
-}
-}
+		if (neurons == null && pattern != null) {
+		
 
+			synapseData = new Array();
+		
+			for (x=0; x<pattern.length; x++) {
 
+				this.network[x] = new Array();
+				
+				for (y=0; y<pattern[x].length; y++) {
 
-}
 
+					synapseData.length = 0;			
 
+					for (i=0; i<pattern[x][y].length; i++) {
 
-function surroundingSample(x, y, i) {
+						synapseData[i] = new Array(pattern[x][y][i], Math.floor(Math.random()*100));
+						
 
+					}
 
-if (x != 0 && y != 0 && x != grid.length - 1 && y != grid[i].length - 1) {
-var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][y + 1][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
-}
+					this.network[x][y] = new neuron(synapseData, Math.floor(Math.random()*100));
+				}
 
-if (x == 0 && y == 0) {
-var surroundPattern = new Array(grid[grid.length - 1][y][i], grid[x][grid[x].length - 1][i], grid[grid.length - 1][grid[x].length - 1][i], grid[grid.length - 1][y + 1][i], grid[x + 1][grid[x].length - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
-}
 
-if (x == grid.length - 1 && y == grid[x].length - 1) {
-var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][0][i], grid[0][y - 1][i], grid[0][y][i], grid[x][0][i], grid[0][0][i]);
-}
+			}
 
-if (x == 0 && y == grid[x].length - 1) { 
-var surroundPattern = new Array(0, 0, 0, 0, 0, 0, 0, 0); //(grid[grid.length - 1][y][i], grid[x][y - 1][i], grid[grid.length - 1][y - 1][i], grid[grid.legnth - 1][0][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][0][i], grid[x + 1][0][i]);
-}
+		}
+	}
 
-if (x == grid.length - 1 && y == 0) {
-var surroundPattern = new Array(grid[0][y][i], grid[x][grid[x].length - 1][i], grid[x - 1][grid[x].length - 1][i], grid[x - 1][y + 1][i], grid[0][grid[x].length - 1][i], grid[0][y][i], grid[x][y + 1][i], grid[grid[x].length - 1][y + 1][i]);
-}
 
-if (y == 0 && x != 0 && x != grid.length - 1) {
-var surroundPattern = new Array(grid[x - 1][y][i], grid[x][grid[x].length - 1][i], grid[x - 1][grid[x].length - 1][i], grid[x - 1][y + 1][i], grid[x + 1][grid[x].length - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
-}
+	
 
-if (y == grid[x].length - 1 && x != 0 && x != grid.length - 1) {
-var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][0][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][0][i], grid[x + 1][0][i]);
-}
 
-if (x == grid.length - 1 && y != 0 && y != grid.length - 1) {
-var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][y + 1][i], grid[0][y - 1][i], grid[0][y][i], grid[x][y + 1][i], grid[0][y + 1][i]);
-}
 
-if (x == 0 && y != 0 && y != grid.length - 1) {
-var surroundPattern = new Array(grid[grid.length - 1][y][i], grid[x][y - 1][i], grid[grid.length - 1][y - 1][i], grid[grid.length - 1][y + 1][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
-}
+//bacterium object. ***************************************************************
+	function bacterium(x, y, i) {
 
-return surroundPattern;
+//Displays germ image in correct location on the grid
+		addImg('germ' + i, 'germ.gif', x, y);
 
+		document.getElementById('germ' + i).oncflick = function() {
 
-}
+			alert('hello');
 
-function sumArray(inputArray) {
+//			document.getElementById('inspector').innerHTML = 'atp ' + germs[i].atp + '<br>Protein ' + germs[i].protein + '<br>Cellwall ' + germs[i].cellWall + '<br>avgGlucose ' + avgGlucose + '<br>avgProtein ' + avgProtein + '<br>avgCilian ' + avgCilian + '<br>counter ' + counter;
 
-var total = 0;
-for (i=0; i<inputArray.length; i++) {
+		}
 
-total = total + inputArray[i];
-}
-return total;
+//Properties for bacterium object
 
-}
+//Tracks number of iterations
+		counter = 0;
+//ATP level for bacterium.
+		this.atp = 20;
+//Integrity of cell wall
+		this.cellWall = 100;
+//Protein level
+		this.protein = 20;
+//X-coordinate for position
+		this.x = x;
+//Y-coordinate for position
+		this.y = y;
+
+//Iteration method
+		this.iterate = function() {
+
+//Increment the counter on each iteration
+			counter++;
+
+//Get average values for substances around bacterium		
+			avgGlucose = sumArray(surroundingSample(this.x, this.y, 1)) / 8;
+			avgProtein = sumArray(surroundingSample(this.x, this.y, 2)) / 8;
+			avgCilian = sumArray(surroundingSample(this.x, this.y, 3)) / 8;
+//			avgCaffeine = sumArray(surroundingSample(this.x, this.y, 4)) / 8;
+
+
+//Only aquire atp if levels within bacterium are below 200
+			if (this.atp < 200) {
+
+//if avgGlucose is less than or equal to one absorb glucose at slighly lower level
+				if (avgGlucose <= 1) {
+					this.atp = this.atp + (avgGlucose * 5);
+				}				
+
+//if avgGlucose is between one and two absorb at a slightly higher level
+				if (avgGlucose > 1 && avgGlucose < 2) {
+					this.atp = this.atp + (avgGlucose * 7);
+				}	
+
+//Absorb a maximum of 14 atp per interation
+				if (avgGlucose >= 2) {
+					this.atp = this.atp + (2 * 7);
+				}
+
+			}
+
+
+//Only aquire protein if levels within bacterium are below 200
+			if (this.protein < 200) {
+
+//if avgProtein is less than or equal to one absorb protein at slighly lower level
+				if (avgProtein <= 1) {
+					this.protein = this.protein + (avgProtein * 5);
+				}
+
+//if avgProtein is between one and two absorb at a slightly higher level
+				if (avgProtein > 1 && avgProtein < 2) {
+					this.protein = this.protein + (avgProtein * 7);
+				}
+
+//Absorb a maximum of 14 protein per interation
+				if (avgProtein >= 2) {
+					this.protein = this.protein + (2 * 7);
+				}
+			}
+			
+
+
+
+//if avgCilian is less than or equal to one absorb protein at slighly lower level
+			if (avgCilian <= 1) {
+				this.cellWall = this.cellWall - (avgCilian * 5);
+			}
+
+//if avgCilian is between one and two absorb at a slightly higher level
+			if (avgCilian > 1 && avgCilian < 2) {
+				this.cellWall = this.cellWall - (avgCilian * 7);
+			}
+
+//if avgCilian is greater than two absorb at a much higher level
+			if (avgCilian >= 2) {
+				this.cellWall = this.cellWall - (avgCilian * 15);
+			}
+
+
+
+
+			if (this.cellWall < 100 && this.cellWall > 90) {
+
+				this.atp = this.atp - ((100 - this.cellWall) / 5);
+				this.protein = this.protein - ((100 - this.cellWall) / 5);
+				this.cellWall = this.cellWall + ((100 - this.cellWall) / 5)
+
+			}
+
+			if (this.cellWall <= 90 && this.cellWall > 70) {
+
+				this.atp = this.atp - ((100 - this.cellWall) / 3);
+				this.protein = this.protein - ((100 - this.cellWall) / 3);
+				this.cellWall = this.cellWall + ((100 - this.cellWall) / 4)
+
+			}
+
+			if (this.cellWall <= 70) {
+
+				this.atp = this.atp - ((100 - this.cellWall) / 2);
+				this.protein = this.protein - ((100 - this.cellWall) / 2);
+				this.cellWall = this.cellWall + ((100 - this.cellWall) / 3)
+
+			}
+
+//			document.getElementById('inspector').innerHTML = 'atp ' + this.atp + '<br>Protein ' + this.protein + '<br>Cellwall ' + this.cellWall + '<br>avgGlucose ' + avgGlucose + '<br>avgProtein ' + avgProtein + '<br>avgCilian ' + avgCilian + '<br>counter ' + counter;
+
+			
+
+		
+		}
+
+	}
+
+
+	function source(type, intensity, x, y, decay) {
+
+
+		this.decay = decay / 100;
+		this.type = type;
+		this.intensity = intensity;
+		this.x = x;
+		this.y = y;
+
+
+	}
+
+
+	function addImg(id, src, x, y) {
+
+
+				getSize();
+
+
+				var newLocation = document.createElement('img');
+				newLocation.setAttribute('id', id);
+				newLocation.setAttribute('src', src);
+				document.getElementById('display').appendChild(newLocation);
+				var currentLocation = document.getElementById(id);
+				currentLocation.style.top = Math.round((myHeight / 35) * x);
+				currentLocation.style.left = Math.round((myWidth / 50) * y);
+				currentLocation.style.position = 'absolute';
+				currentLocation.height = Math.round(myHeight / 34);
+				currentLocation.width = Math.round(myWidth / 49);
+
+
+
+	}
+
+
+	function setupGrid() {
+
+
+		for (i=0; i<5; i++) {
+
+			germs[i] = new bacterium( Math.floor(Math.random()*30),  Math.floor(Math.random()*30), i);
+		}
+
+
+		for (i=0; i<4; i++) {
+
+			if (i > 0) {
+				sources[i] = new source(i, /*Math.floor(Math.random()*100)*/ 90, Math.floor(Math.random()*30), Math.floor(Math.random()*30), 10);
+			}
+
+			var buttonHTML = '<input type=\"radio\" name=\"sourceButtons\" id=\"sourceButton' + i + '\" onClick=\"currentSource=' + i + '\"> ' + i + '<br>';
+			document.getElementById('controlPanel').innerHTML = document.getElementById('controlPanel').innerHTML + buttonHTML;
+
+		}
+
+	
+		for (x=0; x<30; x++)	{
+		
+			grid[x] = new Array();
+			newGrid[x] = new Array();
+	
+			for (y=0; y<30; y++)	{
+
+				addImg('location' + x + '-' + y, 'dot.gif', x, y);
+	
+				grid[x][y] = new Array(0,0,0,0,0,0);
+				newGrid[x][y] = new Array(0,0,0,0,0,0);
+			
+						
+	
+			}
+		}
+	}
+
+
+	function cycleTime() {
+
+		difussion();
+
+		for (i=0; i<germs.length; i++) {
+
+			if (germs[i].cellWall > 20) {
+
+				germs[i].iterate();
+			} else {
+
+				germs.splice(i, 1);
+			}
+		}
+
+		
+	
+		for (i=1; i<sources.length; i++) {
+		
+			newGrid[sources[i].x][sources[i].y][i] = sources[i].intensity;
+
+		}
+
+
+		grid = newGrid.clone();
+
+
+	}
+		
+	function difussion() {
+
+
+		for (x=0; x<grid.length; x++) {
+
+			for (y=0; y<grid[x].length; y++)  {
+
+				for (i=1; i<sources.length; i++) {
+
+					if (dump) {
+						alert(grid[x][y][i]);
+						dump = 0;
+					}
+
+					ii = i;
+
+					currentDecay = sources[i].decay;
+				
+
+					
+					
+					newGrid[x][y][i] = sumArray(surroundingSample(x, y, i)) / (8 + currentDecay);
+
+
+					if (currentSource > 0) {
+						document.getElementById('location' + x + '-' + y).style.opacity = newGrid[x][y][currentSource] / 100;
+						document.getElementById('location' + x + '-' + y).style.filter = 'alpha(opacity=' + newGrid[x][y][currentSource] + ')';
+					} else {
+						document.getElementById('location' + x + '-' + y).style.opacity = 0;
+						document.getElementById('location' + x + '-' + y).style.filter = 'alpha(opacity=0)';
+					}
+					
+					i = ii;
+
+				}
+
+			
+
+				
+			}
+		}
+
+
+
+	}
+
+
+
+	function surroundingSample(x, y, i) {
+
+		
+
+		if (x != 0 && y != 0 && x != grid.length - 1 && y != grid[i].length - 1) {
+			var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][y + 1][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
+		}
+
+		if (x == 0 && y == 0) {
+			var surroundPattern = new Array(grid[grid.length - 1][y][i], grid[x][grid[x].length - 1][i], grid[grid.length - 1][grid[x].length - 1][i], grid[grid.length - 1][y + 1][i], grid[x + 1][grid[x].length - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
+		}					
+
+		if (x == grid.length - 1 && y == grid[x].length - 1) {
+			var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][0][i], grid[0][y - 1][i], grid[0][y][i], grid[x][0][i], grid[0][0][i]);
+		}					
+
+		if (x == 0 && y == grid[x].length - 1) { 
+			var surroundPattern = new Array(0, 0, 0, 0, 0, 0, 0, 0); //(grid[grid.length - 1][y][i], grid[x][y - 1][i], grid[grid.length - 1][y - 1][i], grid[grid.legnth - 1][0][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][0][i], grid[x + 1][0][i]);
+		}
+
+		if (x == grid.length - 1 && y == 0) {
+			var surroundPattern = new Array(grid[0][y][i], grid[x][grid[x].length - 1][i], grid[x - 1][grid[x].length - 1][i], grid[x - 1][y + 1][i], grid[0][grid[x].length - 1][i], grid[0][y][i], grid[x][y + 1][i], grid[grid[x].length - 1][y + 1][i]);
+		}
+
+		if (y == 0 && x != 0 && x != grid.length - 1) {
+			var surroundPattern = new Array(grid[x - 1][y][i], grid[x][grid[x].length - 1][i], grid[x - 1][grid[x].length - 1][i], grid[x - 1][y + 1][i], grid[x + 1][grid[x].length - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
+		}
+
+		if (y == grid[x].length - 1 && x != 0 && x != grid.length - 1) {
+			var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][0][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][0][i], grid[x + 1][0][i]);
+		}
+
+		if (x == grid.length - 1 && y != 0 && y != grid.length - 1) {
+			var surroundPattern = new Array(grid[x - 1][y][i], grid[x][y - 1][i], grid[x - 1][y - 1][i], grid[x - 1][y + 1][i], grid[0][y - 1][i], grid[0][y][i], grid[x][y + 1][i], grid[0][y + 1][i]);
+		}
+
+		if (x == 0 && y != 0 && y != grid.length - 1) {
+			var surroundPattern = new Array(grid[grid.length - 1][y][i], grid[x][y - 1][i], grid[grid.length - 1][y - 1][i], grid[grid.length - 1][y + 1][i], grid[x + 1][y - 1][i], grid[x + 1][y][i], grid[x][y + 1][i], grid[x + 1][y + 1][i]);
+		}
+		
+
+		return surroundPattern;
+
+
+	}
+
+	function sumArray(inputArray) {
+
+		var total = 0;
+	
+		for (i=0; i<inputArray.length; i++) {
+
+			total = total + inputArray[i];
+	
+		}
+	
+		return total;
+
+	}
 
 function getSize() {
-if( typeof( window.innerWidth ) == 'number' ) {
-//Non-IE
-myWidth = window.innerWidth;
-myHeight = window.innerHeight;
-} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-//IE 6+ in 'standards compliant mode'
-myWidth = document.documentElement.clientWidth;
-myHeight = document.documentElement.clientHeight;
-} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-//IE 4 compatible
-myWidth = document.body.clientWidth;
-myHeight = document.body.clientHeight;
+	if( typeof( window.innerWidth ) == 'number' ) {
+	//Non-IE
+	myWidth = window.innerWidth;
+	myHeight = window.innerHeight;
+	} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+	//IE 6+ in 'standards compliant mode'
+	myWidth = document.documentElement.clientWidth;
+	myHeight = document.documentElement.clientHeight;
+	} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+	//IE 4 compatible
+	myWidth = document.body.clientWidth;
+	myHeight = document.body.clientHeight;
   }
 }
 
@@ -410,8 +718,19 @@ right: 50px;
 
 <script>
 
-window.setInterval('cycleTime()', 0);
 
+/*
+testNetArray = new Array(3, 4, 5, 6, 7, 8);
+
+
+testNetObj = new neuralNetwork(null, buildNeuralPattern(testNetArray, 6));
+
+
+document.getElementById('inspector').innerHTML = viewNetwork(testNetObj);
+
+*/
+
+window.setInterval('cycleTime()', 0);
 
 </script>
 
@@ -419,5 +738,4 @@ window.setInterval('cycleTime()', 0);
 
 
 </html>
-
 
