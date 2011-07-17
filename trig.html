@@ -1,0 +1,53 @@
+<html>
+
+ <head>
+
+ <title>trig</title>
+
+
+<body>
+<div id='display'>
+</div>
+ <script type='text/javascript'>
+
+
+angle = 110;
+distance = 250;
+
+
+	if (angle != 0) {
+		angle = Math.PI * (angle / 180);
+	} else {
+
+		angle = 0;
+	}
+
+for (i=0; i<=distance; i++) {
+
+
+		xoffset = Math.cos(angle) * i;
+		yoffset = Math.sqrt((i * i) - (xoffset * xoffset));
+
+
+		newLocation = document.createElement('img');
+		newLocation.setAttribute('id', 'dot' + i);
+		newLocation.setAttribute('src', 'dot.gif');
+		document.getElementById('display').appendChild(newLocation);
+		currentLocation = document.getElementById('dot' + i);
+		currentLocation.style.top = Math.round(100 - xoffset);
+		currentLocation.style.left = Math.round(100 + yoffset);
+		currentLocation.style.position = 'absolute';
+		currentLocation.height = 2;
+		currentLocation.width = 2;
+
+
+
+	}
+
+</script>
+
+
+</body>
+
+</html>
+
