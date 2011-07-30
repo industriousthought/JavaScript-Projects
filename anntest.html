@@ -1,0 +1,84 @@
+<html>
+
+<head>
+
+<title>ANN</title>
+
+<script src="neural.js"></script>
+
+</head>
+
+
+
+<body>
+
+<div id="display"></div>
+
+<div id="textBox"></div>
+
+<script type='text/javascript'>
+
+
+function button(i) {
+
+	
+		newLocation = document.createElement('img');
+		newLocation.setAttribute('id', 'dot' + i);
+		newLocation.setAttribute('src', 'dot.gif');
+		document.getElementById('display').appendChild(newLocation);
+		currentLocation = document.getElementById('dot' + i);
+		currentLocation.style.top = 50;
+		currentLocation.style.left = 10 + (i * 15);
+		currentLocation.style.position = 'absolute';
+		currentLocation.height = 10;
+		currentLocation.width = 10;
+		currentLocation.currentState = 1;
+		this.imgObj = currentLocation;
+		currentLocation.onclick = function() {
+
+			if (document.getElementById('dot' + i).currentState == 1) {
+
+				document.getElementById('dot' + i).currentState = 0;
+				document.getElementById('dot' + i).style.opacity = 0;
+				document.getElementById('dot' + i).style.filter = 'alpha(opacity=0)';
+
+			} else { 
+
+				document.getElementById('dot' + i).currentState = 1;
+				document.getElementById('dot' + i).style.opacity = 1;
+				document.getElementById('dot' + i).style.filter = 'alpha(opacity=100)';
+
+			}
+
+		}
+
+
+}
+
+document.getElementById('display').innerHTML = document.getElementById('display').innerHTML + '<br><br><br><br> <img src=\"dot.gif\" width=\"20\" height=\"10\" onclick=\"alert(testNetObj.evaluate([buttons[0].imgObj.currentState, buttons[1].imgObj.currentState, buttons[2].imgObj.currentState, buttons[3].imgObj.currentState, buttons[4].imgObj.currentState]));\">';
+
+
+var buttons = new Array();
+
+	for (i=0; i<5; i++) {
+
+		buttons[i] = new button(i);
+		
+	} 	
+
+testNetArray = new Array(12, 24, 6, 2);
+
+testNetObj = new neuralNetwork(null, buildNeuralPattern(testNetArray, 5));
+
+document.getElementById('textBox').innerHTML = viewNetwork(testNetObj);
+
+//alert(buttons[1].imgObj.currentState);
+
+//alert(testNetObj.evaluate([buttons[0].imgObj.currentState, buttons[1].imgObj.currentState, buttons[2].imgObj.currentState, buttons[3].imgObj.currentState, buttons[4].imgObj.currentState]));
+
+</script>
+
+</body>
+
+
+</html>

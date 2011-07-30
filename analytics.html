@@ -1,0 +1,111 @@
+<html>
+
+<head>
+
+<title>ANN</title>
+
+
+<body>
+
+<div id="display">
+</div>
+
+
+<script src="utils.js"></script>
+<script src="gridtools.js"></script>
+<script src="analytics.js"></script>
+
+
+<script type='text/javascript'>
+
+for(i=0; i<10; i++) {
+	newLocation = document.createElement('img');
+	newLocation.setAttribute('id', 'bar' + i);
+	newLocation.setAttribute('src', 'dot.gif');
+	document.getElementById('display').appendChild(newLocation);
+	currentLocation = document.getElementById('bar' + i);
+	currentLocation.style.top = 0;
+	currentLocation.style.left = i * 100;
+	currentLocation.style.position = 'absolute';
+	currentLocation.height = 20;
+	currentLocation.width = 1;
+
+	newLocation = document.createElement('img');
+	newLocation.setAttribute('id', 'vbar' + i);
+	newLocation.setAttribute('src', 'dot.gif');
+	document.getElementById('display').appendChild(newLocation);
+	currentLocation = document.getElementById('vbar' + i);
+	currentLocation.style.top = i * 100;
+	currentLocation.style.left = 0;
+	currentLocation.style.position = 'absolute';
+	currentLocation.height = 1;
+	currentLocation.width = 20;
+
+}
+
+var incoming = window.location.toString();
+
+dataSet = incoming.substring(incoming.indexOf('?') + 1, incoming.length - 1).split('-');
+
+for (i=0; i<dataSet.length; i++) {
+
+	dataSet[i] =  dataSet[i].split(',');
+
+}
+
+alert(polarDifferenceSense(dataSet, 10, 10));
+
+/*
+graphableObj = polarDifferenceDistribution(dataSet);
+
+//graphableObj = flatDistribution(dataSet);
+
+var graphableObj = new Array();
+
+for (i=0; i<1000; i++) {
+
+	graphableObj[i] = normalizeInputs(i / 100);
+
+
+}
+
+j = 0;
+
+for (i=0; i<(graphableObj.positive.length + graphableObj.negative.length); i++) {
+
+
+	if (i < graphableObj.positive.length) {
+		value = graphableObj.positive[i];
+	} else {
+		value = graphableObj.negative[i - graphableObj.positive.length];
+	}
+
+
+
+	newLocation = document.createElement('img');
+	newLocation.setAttribute('id', 'dot' + i);
+	newLocation.setAttribute('src', 'dot.gif');
+	document.getElementById('display').appendChild(newLocation);
+	currentLocation = document.getElementById('dot' + i);
+	currentLocation.style.top = value + 200;
+	if (i < graphableObj.positive.length) {
+		currentLocation.style.left = i;
+	} else {
+		currentLocation.style.left = i - graphableObj.positive.length;
+	}
+	currentLocation.style.position = 'absolute';
+	currentLocation.height = 1;
+	currentLocation.width = 1;
+
+//	}
+
+}
+*/
+
+</script>
+
+
+
+</body>
+
+</html>
