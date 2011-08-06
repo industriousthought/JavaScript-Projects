@@ -192,6 +192,16 @@
 				
 				distance = sources[j].distance;
 
+				sources[j].angle = sources[j].angle + (Math.floor(Math.random() * 10) - 5)
+
+				if (sources[j].angle < 0) {	
+					sources[j].angle = sources[j].angle + 360;
+				}
+
+				if (sources[j].angle > 360) {	
+					sources[j].angle = sources[j].angle - 360;
+				}
+
 				if (sources[j].angle != 0) {
 					angle = Math.PI * (sources[j].angle / 180);
 				} else {
