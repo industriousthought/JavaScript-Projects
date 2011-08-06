@@ -31,20 +31,42 @@
 //An array of bacterium objects. 
 		var germs = new Array();
 
+		var germScore = new Array(0, 0, 0, 0, 0);
+
+		var germNets = new Array();;
+
+		var generation = 0;
+
+		var populationCount = 0;
+
+		var groupScore = 0;
+		
+		var scoreHistory = new Array();
+
 //An array that contains the settings for different substances.  Will contains substance objects.
 		var sources = new Array();
+
+		var self = this;
+
+		var i = 0;
+
+		var j = 0;
 
 
 		for (i=0; i<4; i++) {
 
 			if (i > 0) {
-			sources[i] = new source(i, /*Math.floor(Math.random()*100)*/ 90, Math.floor(Math.random()*30), Math.floor(Math.random()	*30), 10);
+
+				sources[i] = new source(i, /*Math.floor(Math.random()*100)*/ 90, Math.floor(Math.random()*30), Math.floor(Math.random()	*30), 12, Math.floor(Math.random()*360), (Math.random() / 2) + .5);
+
 			}
 
 			var buttonHTML = '<input type=\"radio\" name=\"sourceButtons\" id=\"sourceButton' + i + '\" onClick=\"currentSource=' + i + '\"> ' + i + '<br>';
 			document.getElementById('controlPanel').innerHTML = document.getElementById('controlPanel').innerHTML + buttonHTML;
-
 		}
+				
+
+
 
 	
 		for (x=0; x<30; x++)	{
@@ -64,14 +86,33 @@
 			}
 		}
 
+		this.populate = function() {
 
-		for (i=0; i<5; i++) {
-		ii = i;
-		alert(ii + ', ' + i);
-			germs[i] = new bacterium( Math.floor(Math.random()*30),  Math.floor(Math.random()*30), i, neuralMetaPattern);
-		i = ii;
-		alert(ii + ', ' + i);
-		}
+			populationCount = 5;
+
+			
+			if (germNets.length == 0) {
+
+				for (j=0; j<populationCount; j++) {
+					germs[j] = new bacterium( Math.floor(Math.random()*30),  Math.floor(Math.random()*30), j, neuralMetaPattern);
+					germNets[j] = germs[j].neuralNet;
+
+				}
+
+
+
+			} else {
+
+				for (j=0; j<populationCount; j++) {
+					delete germs[j];
+//					alert(germNets[j].network[1].length);
+					germs[j] = new bacterium( Math.floor(Math.random()*30),  Math.floor(Math.random()*30), j, germNets[j]);
+				}
+
+			}
+		}		
+
+		self.populate();
 
 
 		this.analytics = function() {
@@ -81,35 +122,117 @@
 		}
 
 		this.cycle = function() {
+
+			var jj = 0;
+			var i = 0;
+
 			difussion(grid, newGrid, sources);
 
-			for (i=0; i<germs.length; i++) {
-				ii = i;
-				if (germs[i]) {
+			if (populationCount == 0) {
 
-					if (germs[i].cellDeath == false) {
+				if (generation < 10) {
 
-						bacIterate(germs[i], grid);
-	
-					} else {
-	
-						document.getElementById('germ' + i).height = 0;
-						document.getElementById('germ' + i).width = 0;
-						delete germs[i];
-					}
+					self.populate();
+					generation++;
 
+
+				} else {
+//needs cleaning up
+	newLocation = document.createElement('img');
+	newLocation.setAttribute('id', 'scoreDot' + scoreHistory.length);
+	newLocation.setAttribute('src', 'dot.gif');
+	document.getElementById('display').appendChild(newLocation);
+	currentLocation = document.getElementById('scoreDot' + scoreHistory.length);
+	currentLocation.style.bottom = 50 + (groupScore / 100);
+	currentLocation.style.right = 200 - scoreHistory.length;
+	currentLocation.style.position = 'absolute';
+	currentLocation.height = 1;
+	currentLocation.width = 1;
+
+					document.getElementById('inspector2').innerHTML = groupScore;
+					scoreHistory[scoreHistory.length] = groupScore;
+					groupScore = 0;
+					generation = 0;
+					germNets = crossOver(germNets, germScore);
+					for (i=i; i<germScore.length; i++) {germScore[i] = 0;}			
+					self.populate();
 
 				}
-				i = ii;
+				
+			}
+
+			for (j=0; j<germs.length; j++) {
+				i = germs[j].i;
+				jj = j;
+
+				if (germs[j].cellDeath == true) {
+
+					populationCount--;
+					germScore[i] = germScore[i] + (germs[j].counter);
+					document.getElementById('germ' + i).style.visibilty = 'hidden';
+					germs.splice(j, 1);
+
+
+
+				} else {
+
+					groupScore++;
+					bacIterate(germs[j], grid);
+
+				}
+			
+				j = jj;
 
 			}
 
-		
+			var angle = 0;
+			var distance = 0; 
 	
-			for (i=1; i<sources.length; i++) {
-		
-				newGrid[sources[i].x][sources[i].y][i] = sources[i].intensity;
+			for (j=1; j<sources.length; j++) {
+				
+				distance = sources[j].distance;
 
+				if (sources[j].angle != 0) {
+					angle = Math.PI * (sources[j].angle / 180);
+				} else {
+	
+					angle = 0;
+				}
+
+		
+				var xoffset = Math.cos(angle) * distance;
+
+				if (angle > Math.PI) {
+
+					var yoffset = Math.sqrt((distance * distance) - (xoffset * xoffset));
+
+				} else {
+
+					var yoffset = 0 - (Math.sqrt((distance * distance) - (xoffset * xoffset)));
+
+				}
+				sources[j].x = sources[j].x - xoffset;
+				sources[j].y = sources[j].y + yoffset;
+
+				if (sources[j].x > 30) {
+					sources[j].x = sources[j].x - 30;
+				}
+
+				if (sources[j].y > 30) {
+					sources[j].y = sources[j].y - 30;
+				}
+
+				if (sources[j].x < 0) {
+					sources[j].x = sources[j].x + 30;
+				}
+
+				if (sources[j].y < 0) {
+					sources[j].y = sources[j].y + 30;
+				}
+
+
+				newGrid[Math.floor(sources[j].x)][Math.floor(sources[j].y)][j] = sources[j].intensity;
+				
 			}
 
 

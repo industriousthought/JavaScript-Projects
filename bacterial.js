@@ -1,6 +1,6 @@
 
 //bacterium object. ***************************************************************
-	function bacterium(x, y, i, metaPattern) {
+	function bacterium(x, y, i, pattern) {
 
 //Displays germ image in correct location on the grid
 		addImg('germ' + i, 'germ.gif', x, y);
@@ -23,7 +23,13 @@
 		this.y = y;
 		this.i = i;
 
-		this.neuralNet = new neuralNetwork(null, buildNeuralPattern(metaPattern, 5));
+
+
+		if (pattern.network) {
+			this.neuralNet = pattern;//new neuralNetwork(pattern, null);
+		} else {
+			this.neuralNet = new neuralNetwork(null, buildNeuralPattern(pattern, 5));
+		}
 
 /*		document.getElementById('germ' + i).onclick = function() {
 
@@ -142,8 +148,15 @@
 
 		}
 
-		angle = Math.random()*360;
-		distance = Math.random();
+		netOutput = parentObj.neuralNet.evaluate(polarDifferenceSense(gridObj, Math.floor(parentObj.x), Math.floor(parentObj.y)));
+
+		angle = netOutput[0] * 3.6;
+		distance = Math.floor(netOutput[1]) / 100;
+
+		if (angle > 360) { angle = 360; }
+
+//		angle = Math.random()*360;
+//		distance = 1; //Math.random();
 
 		if (angle != 0) {
 			angle = Math.PI * (angle / 180);
@@ -153,15 +166,15 @@
 		}
 
 
-		xoffset = Math.cos(angle) * distance;
+		var xoffset = Math.cos(angle) * distance;
 
 		if (angle > Math.PI) {
 
-			yoffset = Math.sqrt((distance * distance) - (xoffset * xoffset));
+			var yoffset = Math.sqrt((distance * distance) - (xoffset * xoffset));
 
 		} else {
 
-			yoffset = 0 - (Math.sqrt((distance * distance) - (xoffset * xoffset)));
+			var yoffset = 0 - (Math.sqrt((distance * distance) - (xoffset * xoffset)));
 
 		}
 		parentObj.x = parentObj.x - xoffset;

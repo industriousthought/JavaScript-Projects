@@ -29,7 +29,7 @@ function polarDifferenceSense(dataSetObj, x, y) {
 
 	for (i=0; i<3; i++) {
 
-		surroundArray = surroundingSample(dataSetObj, x, y, i);
+		var surroundArray = surroundingSample(dataSetObj, x, y, i);
 
 			
 		if (surroundArray[0] - surroundArray[5] < 0) {
@@ -88,7 +88,7 @@ function polarDifferenceDistribution(dataSetObj) {
 
 		for (y=0; y<dataSetObj[x].length; y++) {
 
-			surroundArray = surroundingSample(dataSetObj, x, y, 0);
+			var surroundArray = surroundingSample(dataSetObj, x, y, 0);
 
 			
 			if (surroundArray[0] - surroundArray[5] <= 0) {
@@ -121,7 +121,7 @@ function polarDifferenceDistribution(dataSetObj) {
 		}
 	}
 
-	alert(pVD + ',  ' + negValueDistribution);
+//	alert(pVD + ',  ' + negValueDistribution);
 	
 	valDist = new valueDistribution(pVD, negValueDistribution);
 
@@ -142,6 +142,7 @@ function normalizeInputs(x) {
 		x = 50 - (100 / ((x + 1.42) * (x + 1.42)));
 
 		if (x > 50) {x = 50};
+
 
 
 	return x;

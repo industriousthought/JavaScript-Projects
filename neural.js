@@ -1,4 +1,65 @@
 
+
+	function crossOver(nets, scores) {
+
+
+		var i = 0;
+		var best = 0;
+		var secondBest = 0;
+		var neuronCount = 0;
+		var placeHolder = 0;
+		var crossOverPoint = 0;
+
+
+		for (i=0; i<scores.length; i++) {
+			if (scores[i] > best) {
+				best = nets[i];
+			}
+		}
+		
+		delete scores[i];
+
+		for (i=0; i<scores.length; i++) {
+			if (scores[i] > secondBest) {
+				secondBest = nets[i];
+			}
+		}
+
+		for (x=0; x<best.network.length; x++) {
+
+			neuronCount  = neuronCount + best.network[x].length;
+
+		}
+
+
+		for (i=1; i<nets.length; i++) {
+
+
+			crossOverPoint = Math.floor(Math.random()*neuronCount);
+			placeHolder = 0;
+
+			for (x=0; x<nets[i].network.length; x++) {
+				for (y=0; y<nets[i].network[x].length; y++) {
+
+					placeHolder++;
+					if (placeHolder < crossOverPoint) {
+						nets[i].network[x][y] = best.network[x][y];
+					} else {
+						nets[i].network[x][y] = secondBest.network[x][y];
+					}
+					
+
+				}
+			}
+		}
+
+		nets[0] = best;
+
+		return nets;
+
+	}
+
+
 //step through a neuralNetwork object and return html with data on neural configuration
 	function viewNetwork(netObj) {
 		
@@ -55,6 +116,7 @@
 //synaptic connections, set to the number of neurons in that layer. 
 		var workingDensityFactor = 0;
 
+		var ii = 0;
 
 		for (x=0; x<metaPattern.length; x++) {
 
@@ -206,24 +268,19 @@
 		}
 
 //network is an array of neuron objects
-		this.network = new Array();
 
 //These nested loops cycle through the network data and uses it to populate an array with neuron objects.
 
 		if (neurons != null && pattern == null) {
-			for (x=0; x<neurons.length; x++) {
 
-				this.network[x] = new Array();
+			this.network = neurons;
 
-				for (y=0; y<neurons[x].length; y++) {
-			
-					this.network[x][y] = new neuron(neurons[x][y][0], neurons[x][y][1]);
-				}
-
-			}
 		}
 
 		if (neurons == null && pattern != null) {
+
+			this.network = new Array();
+
 		
 			//alert(pattern.length);
 
@@ -240,7 +297,7 @@
 
 					for (i=0; i<pattern[x][y].length; i++) {
 
-						synapseData[i] = new Array(pattern[x][y][i], Math.floor(Math.random()*125));
+						synapseData[i] = new Array(pattern[x][y][i], Math.random()*30);
 						
 
 					}

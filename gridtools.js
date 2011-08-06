@@ -50,7 +50,7 @@
 
 function gridDump(gridObj) {
 
-	gridData = '';
+	var gridData = '';
 
 	for (x=0; x<gridObj.length; x++) {
 
@@ -77,6 +77,7 @@ function gridDump(gridObj) {
 
 	function difussion(gridObj, newGridObj, srcObj) {
 
+		var ii = 0;
 
 		for (x=0; x<gridObj.length; x++) {
 
@@ -84,12 +85,13 @@ function gridDump(gridObj) {
 
 				for (i=1; i<srcObj.length; i++) {
 
+					ii = i;
+
+
 					if (dump) {
 						alert(gridObj[x][y][i]);
 						dump = 0;
 					}
-
-					ii = i;
 
 					currentDecay = srcObj[i].decay;
 				
@@ -124,7 +126,7 @@ function gridDump(gridObj) {
 
 
 
-	function source(type, intensity, x, y, decay) {
+	function source(type, intensity, x, y, decay, angle, distance) {
 
 
 		this.decay = decay / 100;
@@ -132,7 +134,8 @@ function gridDump(gridObj) {
 		this.intensity = intensity;
 		this.x = x;
 		this.y = y;
-
+		this.angle = angle;
+		this.distance = distance;
 
 	}
 

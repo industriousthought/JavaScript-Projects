@@ -32,11 +32,11 @@ function button(i) {
 		currentLocation.style.position = 'absolute';
 		currentLocation.height = 10;
 		currentLocation.width = 10;
-		currentLocation.currentState = 1;
+		currentLocation.currentState = 100;
 		this.imgObj = currentLocation;
 		currentLocation.onclick = function() {
 
-			if (document.getElementById('dot' + i).currentState == 1) {
+			if (document.getElementById('dot' + i).currentState == 100) {
 
 				document.getElementById('dot' + i).currentState = 0;
 				document.getElementById('dot' + i).style.opacity = 0;
@@ -44,7 +44,7 @@ function button(i) {
 
 			} else { 
 
-				document.getElementById('dot' + i).currentState = 1;
+				document.getElementById('dot' + i).currentState = 100;
 				document.getElementById('dot' + i).style.opacity = 1;
 				document.getElementById('dot' + i).style.filter = 'alpha(opacity=100)';
 

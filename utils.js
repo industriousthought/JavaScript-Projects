@@ -34,15 +34,19 @@ function getSize() {
 
 		getSize();
 
+		if (!document.getElementById(id)) {
 
-		var newLocation = document.createElement('img');
-		newLocation.setAttribute('id', id);
-		newLocation.setAttribute('src', src);
-		document.getElementById('display').appendChild(newLocation);
+			var newLocation = document.createElement('img');
+			newLocation.setAttribute('id', id);
+			newLocation.setAttribute('src', src);
+			document.getElementById('display').appendChild(newLocation);
+			
+		}
 		var currentLocation = document.getElementById(id);
 		currentLocation.style.top = Math.round((myHeight / 35) * x);
 		currentLocation.style.left = Math.round((myWidth / 50) * y);
 		currentLocation.style.position = 'absolute';
+		currentLocation.style.visibility = 'visible';
 		currentLocation.height = Math.round(myHeight / 34);
 		currentLocation.width = Math.round(myWidth / 49);
 

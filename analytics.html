@@ -14,6 +14,7 @@
 <script src="utils.js"></script>
 <script src="gridtools.js"></script>
 <script src="analytics.js"></script>
+<script src="neural.js"></script>
 
 
 <script type='text/javascript'>
@@ -53,7 +54,12 @@ for (i=0; i<dataSet.length; i++) {
 
 }
 
-alert(polarDifferenceSense(dataSet, 10, 10));
+	var metaPattern = new Array(12, 24, 6, 2);
+
+	neuralNet = new neuralNetwork(null, buildNeuralPattern(metaPattern, 5));
+
+	alert(neuralNet.evaluate(polarDifferenceSense(dataSet, 10, 10)));
+
 
 /*
 graphableObj = polarDifferenceDistribution(dataSet);
